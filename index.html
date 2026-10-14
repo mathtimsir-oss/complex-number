@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Numbers & Operations - Interactive Learning Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering math formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Smooth tab transition */
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Drag and Drop styling */
+        .draggable-item {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .drop-zone {
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .drop-zone.drag-over {
+            background-color: #e0f2fe !important;
+            border-color: #0284c7 !important;
+        }
+
+        /* Cycling wheel animation */
+        @keyframes rotateWheel {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Glowing highlight for active power */
+        .power-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .power-card.active-power {
+            transform: scale(1.08);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6;
+        }
+
+        /* Math styling adjustments */
+        .mjx-chtml {
+            font-size: 110% !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-blue-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-amber-400 text-indigo-950 p-2 rounded-lg font-black text-xl shadow-inner">
+                        \(i^2 = -1\)
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-white">Complex Numbers Explorer</h1>
+                        <p class="text-xs text-indigo-200 hidden sm:block">Interactive Textbook Companion & Operations Guide</p>
+                    </div>
+                </div>
+                
+                <div class="text-xs bg-indigo-950/60 px-3 py-1.5 rounded-full border border-indigo-700/50 flex items-center space-x-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-indigo-200">Interactive Math Lab</span>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <nav class="flex space-x-1 overflow-x-auto pb-2 scrollbar-none border-t border-indigo-700/40 pt-2 text-xs sm:text-sm font-medium">
+                <button onclick="switchTab('tab-powers')" id="btn-tab-powers" class="nav-tab px-4 py-2 rounded-lg text-indigo-100 hover:bg-indigo-700/50 whitespace-nowrap transition-colors active flex items-center gap-2 bg-indigo-700 font-semibold text-white">
+                    <i class="fa-solid fa-arrows-spin"></i> 1. Powers of \(i\)
+                </button>
+                <button onclick="switchTab('tab-add-sub')" id="btn-tab-add-sub" class="nav-tab px-4 py-2 rounded-lg text-indigo-100 hover:bg-indigo-700/50 whitespace-nowrap transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-plus-minus"></i> 2. Addition & Subtraction
+                </button>
+                <button onclick="switchTab('tab-multiplication')" id="btn-tab-multiplication" class="nav-tab px-4 py-2 rounded-lg text-indigo-100 hover:bg-indigo-700/50 whitespace-nowrap transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-xmark"></i> 3. Multiplication (Interactive)
+                </button>
+                <button onclick="switchTab('tab-division')" id="btn-tab-division" class="nav-tab px-4 py-2 rounded-lg text-indigo-100 hover:bg-indigo-700/50 whitespace-nowrap transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-divide"></i> 4. Division & Conjugates
+                </button>
+                <button onclick="switchTab('tab-practice')" id="btn-tab-practice" class="nav-tab px-4 py-2 rounded-lg text-indigo-100 hover:bg-indigo-700/50 whitespace-nowrap transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> 5. Practice Exercises
+                </button>
+                <button onclick="switchTab('tab-challenges')" id="btn-tab-challenges" class="nav-tab px-4 py-2 rounded-lg text-indigo-100 hover:bg-indigo-700/50 whitespace-nowrap transition-colors flex items-center gap-2 text-amber-300 hover:text-amber-200">
+                    <i class="fa-solid fa-trophy"></i> 6. Challenge Questions
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- SECTION 1: CYCLE OF POWERS OF i -->
+        <section id="tab-powers" class="tab-content active space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="border-b border-slate-100 pb-4 mb-6">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Section 2.4</span>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-2">Pattern of Powers of \(i\) (Indices of \(i\))</h2>
+                    <p class="text-slate-600 text-sm mt-1">Discover how powers of the imaginary unit \(i\) cycle continuously every 4 exponent increments.</p>
+                </div>
+
+                <!-- Fundamental 4 Powers Visual Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div id="card-p1" class="power-card bg-amber-50 border-2 border-amber-300 rounded-xl p-4 text-center cursor-pointer hover:bg-amber-100 transition" onclick="selectPower(1)">
+                        <div class="text-xs font-bold text-amber-700 mb-1">Power 1</div>
+                        <div class="text-2xl font-bold text-amber-900 mb-1">\(i^1 = i\)</div>
+                        <div class="text-xs text-amber-600">Remainder = 1</div>
+                    </div>
+                    <div id="card-p2" class="power-card bg-orange-50 border-2 border-orange-300 rounded-xl p-4 text-center cursor-pointer hover:bg-orange-100 transition" onclick="selectPower(2)">
+                        <div class="text-xs font-bold text-orange-700 mb-1">Power 2</div>
+                        <div class="text-2xl font-bold text-orange-900 mb-1">\(i^2 = -1\)</div>
+                        <div class="text-xs text-orange-600">Remainder = 2</div>
+                    </div>
+                    <div id="card-p3" class="power-card bg-sky-50 border-2 border-sky-300 rounded-xl p-4 text-center cursor-pointer hover:bg-sky-100 transition" onclick="selectPower(3)">
+                        <div class="text-xs font-bold text-sky-700 mb-1">Power 3</div>
+                        <div class="text-2xl font-bold text-sky-900 mb-1">\(i^3 = -i\)</div>
+                        <div class="text-xs text-sky-600">\(i^2 \cdot i = (-1)i = -i\)</div>
+                    </div>
+                    <div id="card-p4" class="power-card bg-pink-50 border-2 border-pink-300 rounded-xl p-4 text-center cursor-pointer hover:bg-pink-100 transition" onclick="selectPower(0)">
+                        <div class="text-xs font-bold text-pink-700 mb-1">Power 4</div>
+                        <div class="text-2xl font-bold text-pink-900 mb-1">\(i^4 = 1\)</div>
+                        <div class="text-xs text-pink-600">\(i^2 \cdot i^2 = (-1)(-1) = 1\)</div>
+                    </div>
+                </div>
+
+                <!-- Interactive Clock/Wheel and Calculator Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    
+                    <!-- Left Column: Wheel Visualizer -->
+                    <div class="flex flex-col items-center justify-center">
+                        <h3 class="text-base font-semibold text-slate-700 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-arrows-spin text-indigo-600"></i> The 4-Step Cycle Wheel
+                        </h3>
+                        
+                        <div class="relative w-64 h-64 flex items-center justify-center">
+                            <!-- Outer Circular Ring -->
+                            <div class="absolute inset-0 rounded-full border-4 border-dashed border-indigo-200 animate-[spin_30s_linear_infinite]"></div>
+                            
+                            <!-- Central Node -->
+                            <div id="wheel-center" class="w-24 h-24 rounded-full bg-indigo-600 text-white flex flex-col items-center justify-center shadow-lg z-10 transition-all duration-300">
+                                <span class="text-xs uppercase font-semibold text-indigo-200">Result</span>
+                                <span id="wheel-result-val" class="text-2xl font-black">\(i\)</span>
+                            </div>
+
+                            <!-- Position 1: i (Top) -->
+                            <button onclick="calcExponent(1)" class="absolute -top-2 w-12 h-12 rounded-full bg-amber-400 text-indigo-950 font-bold flex items-center justify-center shadow-md hover:scale-110 transition">
+                                \(i\)
+                            </button>
+                            <!-- Position 2: -1 (Right) -->
+                            <button onclick="calcExponent(2)" class="absolute -right-2 w-12 h-12 rounded-full bg-orange-400 text-indigo-950 font-bold flex items-center justify-center shadow-md hover:scale-110 transition">
+                                \(-1\)
+                            </button>
+                            <!-- Position 3: -i (Bottom) -->
+                            <button onclick="calcExponent(3)" class="absolute -bottom-2 w-12 h-12 rounded-full bg-sky-400 text-indigo-950 font-bold flex items-center justify-center shadow-md hover:scale-110 transition">
+                                \(-i\)
+                            </button>
+                            <!-- Position 4: 1 (Left) -->
+                            <button onclick="calcExponent(4)" class="absolute -left-2 w-12 h-12 rounded-full bg-pink-400 text-indigo-950 font-bold flex items-center justify-center shadow-md hover:scale-110 transition">
+                                \(1\)
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-4 text-center">Click any node or enter an exponent to evaluate instantly.</p>
+                    </div>
+
+                    <!-- Right Column: Interactive Exponent Calculator -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-indigo-600"></i> Any Power Calculator: \(i^n\)
+                        </h3>
+
+                        <div>
+                            <label for="power-input" class="block text-xs font-semibold text-slate-600 uppercase mb-1">Enter Exponent \(n\) (Positive Integer):</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="power-input" value="26" min="1" max="9999" class="flex-grow px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-bold text-lg text-slate-800">
+                                <button onclick="calculateCustomPower()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2 rounded-lg transition shadow-md">
+                                    Calculate
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step-by-Step Remainder Breakdown -->
+                        <div id="power-step-display" class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-sm">
+                            <div class="flex justify-between border-b border-slate-200 pb-2">
+                                <span class="text-slate-600">Step 1: Division by 4</span>
+                                <span id="step-div" class="font-mono font-bold text-indigo-600">26 ÷ 4 = 6 R 2</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-200 pb-2">
+                                <span class="text-slate-600">Step 2: Key Remainder</span>
+                                <span id="step-remainder" class="font-mono font-bold text-amber-600">Remainder = 2</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-200 pb-2">
+                                <span class="text-slate-600">Step 3: Algebraic Form</span>
+                                <span id="step-algebraic" class="font-mono text-slate-800">\(i^{26} = (i^4)^6 \cdot i^2\)</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-1 font-bold text-base">
+                                <span class="text-slate-800">Final Simplified Value:</span>
+                                <span id="step-final" class="text-indigo-700 bg-indigo-100 px-3 py-1 rounded-md text-lg">\(i^2 = -1\)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Fill-in Grid (Textbook Page 1 exercise) -->
+                <div class="mt-8 bg-lime-50/70 border border-lime-200 rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-lime-900 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb text-amber-500"></i> Interactive Power Sequence Practice (\(i^5\) to \(i^{12}\))
+                    </h3>
+                    <p class="text-xs text-lime-800 mb-4">Complete the blanks corresponding to the textbook exercise to test your understanding of powers of \(i\).</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- i^5 -->
+                        <div class="bg-white p-3 rounded-lg border border-lime-300 text-xs space-y-2 shadow-sm">
+                            <div class="font-bold text-lime-800 border-b border-lime-100 pb-1">\(i^5\)</div>
+                            <div>\(i^5 = i^4 \cdot i\)</div>
+                            <div>\(= (1)(\text{ ? })\)</div>
+                            <div class="flex items-center gap-1">
+                                <span>=</span>
+                                <input type="text" id="blank-i5" placeholder="ans" class="w-16 px-2 py-0.5 border border-slate-300 rounded text-center text-xs font-bold">
+                                <button onclick="checkBlank('i5', 'i')" class="bg-lime-600 text-white px-2 py-0.5 rounded text-[10px]">Check</button>
+                            </div>
+                            <div id="feedback-i5" class="text-[11px] font-semibold"></div>
+                        </div>
+
+                        <!-- i^6 -->
+                        <div class="bg-white p-3 rounded-lg border border-lime-300 text-xs space-y-2 shadow-sm">
+                            <div class="font-bold text-lime-800 border-b border-lime-100 pb-1">\(i^6\)</div>
+                            <div>\(i^6 = i^4 \cdot (\text{ ? })\)</div>
+                            <div>\(= (1)(-1)\)</div>
+                            <div class="flex items-center gap-1">
+                                <span>=</span>
+                                <input type="text" id="blank-i6" placeholder="ans" class="w-16 px-2 py-0.5 border border-slate-300 rounded text-center text-xs font-bold">
+                                <button onclick="checkBlank('i6', '-1')" class="bg-lime-600 text-white px-2 py-0.5 rounded text-[10px]">Check</button>
+                            </div>
+                            <div id="feedback-i6" class="text-[11px] font-semibold"></div>
+                        </div>
+
+                        <!-- i^7 -->
+                        <div class="bg-white p-3 rounded-lg border border-lime-300 text-xs space-y-2 shadow-sm">
+                            <div class="font-bold text-lime-800 border-b border-lime-100 pb-1">\(i^7\)</div>
+                            <div>\(i^7 = i^4 \cdot i^3\)</div>
+                            <div>\(= (1)(-i)\)</div>
+                            <div class="flex items-center gap-1">
+                                <span>=</span>
+                                <input type="text" id="blank-i7" placeholder="ans" class="w-16 px-2 py-0.5 border border-slate-300 rounded text-center text-xs font-bold">
+                                <button onclick="checkBlank('i7', '-i')" class="bg-lime-600 text-white px-2 py-0.5 rounded text-[10px]">Check</button>
+                            </div>
+                            <div id="feedback-i7" class="text-[11px] font-semibold"></div>
+                        </div>
+
+                        <!-- i^8 -->
+                        <div class="bg-white p-3 rounded-lg border border-lime-300 text-xs space-y-2 shadow-sm">
+                            <div class="font-bold text-lime-800 border-b border-lime-100 pb-1">\(i^8\)</div>
+                            <div>\(i^8 = (i^4)^2\)</div>
+                            <div>\(= (1)^2\)</div>
+                            <div class="flex items-center gap-1">
+                                <span>=</span>
+                                <input type="text" id="blank-i8" placeholder="ans" class="w-16 px-2 py-0.5 border border-slate-300 rounded text-center text-xs font-bold">
+                                <button onclick="checkBlank('i8', '1')" class="bg-lime-600 text-white px-2 py-0.5 rounded text-[10px]">Check</button>
+                            </div>
+                            <div id="feedback-i8" class="text-[11px] font-semibold"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: DEFINITION, ADDITION & SUBTRACTION -->
+        <section id="tab-add-sub" class="tab-content space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="border-b border-slate-100 pb-4 mb-6">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Section 2.5 A</span>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-2">Definition, Addition & Subtraction of Complex Numbers</h2>
+                    <p class="text-slate-600 text-sm mt-1">A complex number has the standard form <span class="font-semibold text-indigo-700">\(a + bi\)</span> where \(a\) is the Real Part and \(b\) is the Imaginary Part.</p>
+                </div>
+
+                <!-- Definition Card Showcase -->
+                <div class="bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-200 rounded-xl p-6 mb-8 flex flex-col md:flex-row items-center justify-around gap-6 text-center">
+                    <div>
+                        <div class="text-xs uppercase font-bold text-slate-500 mb-1">Standard Form</div>
+                        <div class="text-4xl font-black text-slate-800 tracking-wider">
+                            <span class="text-blue-600 underline decoration-blue-400 decoration-4 underline-offset-8">a</span> + 
+                            <span class="text-emerald-600 underline decoration-emerald-400 decoration-4 underline-offset-8">b</span><span class="text-purple-600">i</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs font-medium">
+                        <div class="bg-white p-3 rounded-lg shadow-sm border border-blue-200 text-left">
+                            <span class="text-blue-600 font-bold block text-sm">Real Part \(a\)</span>
+                            <span>A real number (e.g. \(3, -1, 0, \sqrt{2}\))</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg shadow-sm border border-emerald-200 text-left">
+                            <span class="text-emerald-600 font-bold block text-sm">Imaginary Part \(b\)</span>
+                            <span>Coefficient of \(i\) (Note: \(b\) is a real number!)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Addition & Subtraction Calculator -->
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-6">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-indigo-600"></i> Interactive Complex Addition & Subtraction Calculator
+                    </h3>
+
+                    <!-- Inputs Controls -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Complex Number 1 -->
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                            <div class="text-sm font-bold text-slate-700 flex justify-between">
+                                <span>First Complex Number \(Z_1 = a + bi\)</span>
+                                <span id="z1-badge" class="text-indigo-600 font-mono">1 + 3i</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-xs text-slate-500 block">Real Part \(a\): <span id="val-a" class="font-bold text-blue-600">1</span></label>
+                                    <input type="range" id="input-a" min="-10" max="10" value="1" oninput="updateAddSubCalc()" class="w-full accent-blue-600">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-slate-500 block">Imaginary Part \(b\): <span id="val-b" class="font-bold text-emerald-600">3</span></label>
+                                    <input type="range" id="input-b" min="-10" max="10" value="3" oninput="updateAddSubCalc()" class="w-full accent-emerald-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Complex Number 2 -->
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                            <div class="text-sm font-bold text-slate-700 flex justify-between">
+                                <span>Second Complex Number \(Z_2 = c + di\)</span>
+                                <span id="z2-badge" class="text-indigo-600 font-mono">4 - 6i</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-xs text-slate-500 block">Real Part \(c\): <span id="val-c" class="font-bold text-blue-600">4</span></label>
+                                    <input type="range" id="input-c" min="-10" max="10" value="4" oninput="updateAddSubCalc()" class="w-full accent-blue-600">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-slate-500 block">Imaginary Part \(d\): <span id="val-d" class="font-bold text-emerald-600">-6</span></label>
+                                    <input type="range" id="input-d" min="-10" max="10" value="-6" oninput="updateAddSubCalc()" class="w-full accent-emerald-600">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Operation Mode Switcher -->
+                    <div class="flex justify-center gap-4">
+                        <button id="op-add-btn" onclick="setOpMode('add')" class="px-6 py-2 rounded-lg font-bold text-sm bg-indigo-600 text-white shadow-md transition">
+                            Addition: \(Z_1 + Z_2\)
+                        </button>
+                        <button id="op-sub-btn" onclick="setOpMode('sub')" class="px-6 py-2 rounded-lg font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300 transition">
+                            Subtraction: \(Z_1 - Z_2\)
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Visual Breakdown -->
+                    <div class="bg-white p-5 rounded-xl border border-indigo-100 shadow-md space-y-4">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Step-by-Step Grouping Visualization</div>
+                        
+                        <!-- Step 1: Remove brackets -->
+                        <div class="flex items-center text-sm sm:text-base font-mono bg-slate-50 p-3 rounded-lg overflow-x-auto">
+                            <span class="text-slate-400 w-24 flex-shrink-0 text-xs font-sans">Step 1 (Expand):</span>
+                            <span id="calc-step1">\( (1 + 3i) + (4 - 6i) = 1 + 3i + 4 - 6i \)</span>
+                        </div>
+
+                        <!-- Step 2: Group Real and Imaginary -->
+                        <div class="flex items-center text-sm sm:text-base font-mono bg-slate-50 p-3 rounded-lg overflow-x-auto">
+                            <span class="text-slate-400 w-24 flex-shrink-0 text-xs font-sans">Step 2 (Group):</span>
+                            <span id="calc-step2">\( = (\mathbf{1 + 4}) + (\mathbf{3 - 6})i \)</span>
+                        </div>
+
+                        <!-- Step 3: Final Answer -->
+                        <div class="flex items-center text-base sm:text-lg font-mono bg-indigo-50 border border-indigo-200 p-3 rounded-lg text-indigo-900 font-bold overflow-x-auto">
+                            <span class="text-indigo-600 w-24 flex-shrink-0 text-xs font-sans">Final Result:</span>
+                            <span id="calc-step3">\( = 5 - 3i \)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MULTIPLICATION & DISTRIBUTIVE LAW (DRAG & DROP) -->
+        <section id="tab-multiplication" class="tab-content space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="border-b border-slate-100 pb-4 mb-6">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Section 2.5 B</span>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-2">Multiplication of Complex Numbers & Distributive Law</h2>
+                    <p class="text-slate-600 text-sm mt-1">Multiply complex numbers using the distributive law (FOIL method) and simplify using <span class="font-bold text-indigo-600">\(i^2 = -1\)</span>.</p>
+                </div>
+
+                <!-- Drag & Drop Interactive FOIL Lab -->
+                <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-6 rounded-2xl shadow-lg space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-indigo-700/50 pb-3">
+                        <div>
+                            <h3 class="text-lg font-bold text-amber-300 flex items-center gap-2">
+                                <i class="fa-solid fa-hand-pointer"></i> Interactive FOIL Expansion Lab
+                            </h3>
+                            <p class="text-xs text-indigo-200">Expand <span class="font-mono text-amber-200 text-sm">\((2 - 3i)(4 + i)\)</span> by dragging terms to their correct FOIL position!</p>
+                        </div>
+                        <button onclick="resetMultDragLab()" class="text-xs bg-indigo-800 hover:bg-indigo-700 px-3 py-1.5 rounded-lg border border-indigo-600 transition">
+                            <i class="fa-solid fa-rotate"></i> Reset Activity
+                        </button>
+                    </div>
+
+                    <!-- Problem Statement -->
+                    <div class="text-center py-2 text-2xl font-mono font-bold text-white tracking-wide">
+                        \((2 - 3i)(4 + i)\)
+                    </div>
+
+                    <!-- Available Drag Elements Bank -->
+                    <div class="bg-indigo-950/80 p-4 rounded-xl border border-indigo-700/50">
+                        <div class="text-xs font-bold uppercase text-indigo-300 mb-2">Drag These Terms into the FOIL Expansion slots below:</div>
+                        <div id="drag-bank-mult" class="flex flex-wrap gap-3 justify-center min-h-[50px] items-center">
+                            <div draggable="true" ondragstart="handleDragStart(event)" id="drag-t1" data-term="8" class="draggable-item bg-amber-500 hover:bg-amber-400 text-indigo-950 font-mono font-black px-4 py-2 rounded-lg shadow-md cursor-grab text-base">
+                                8
+                            </div>
+                            <div draggable="true" ondragstart="handleDragStart(event)" id="drag-t2" data-term="2i" class="draggable-item bg-sky-500 hover:bg-sky-400 text-indigo-950 font-mono font-black px-4 py-2 rounded-lg shadow-md cursor-grab text-base">
+                                +2i
+                            </div>
+                            <div draggable="true" ondragstart="handleDragStart(event)" id="drag-t3" data-term="-12i" class="draggable-item bg-purple-500 hover:bg-purple-400 text-indigo-950 font-mono font-black px-4 py-2 rounded-lg shadow-md cursor-grab text-base">
+                                -12i
+                            </div>
+                            <div draggable="true" ondragstart="handleDragStart(event)" id="drag-t4" data-term="-3i^2" class="draggable-item bg-emerald-500 hover:bg-emerald-400 text-indigo-950 font-mono font-black px-4 py-2 rounded-lg shadow-md cursor-grab text-base">
+                                -3i²
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Target Expansion Slots Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <!-- First (F) -->
+                        <div class="bg-indigo-950/50 p-3 rounded-xl border border-indigo-700/50 text-center flex flex-col justify-between">
+                            <span class="text-[10px] font-bold uppercase text-indigo-300 mb-1">First (2 × 4)</span>
+                            <div id="drop-foil-f" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropMult(event, '8', 'drop-foil-f')" class="drop-zone min-h-[55px] border-2 border-dashed border-indigo-600 rounded-lg flex items-center justify-center font-mono font-bold text-amber-300 bg-indigo-900/30">
+                                Drop Here
+                            </div>
+                        </div>
+
+                        <!-- Outer (O) -->
+                        <div class="bg-indigo-950/50 p-3 rounded-xl border border-indigo-700/50 text-center flex flex-col justify-between">
+                            <span class="text-[10px] font-bold uppercase text-indigo-300 mb-1">Outer (2 × i)</span>
+                            <div id="drop-foil-o" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropMult(event, '2i', 'drop-foil-o')" class="drop-zone min-h-[55px] border-2 border-dashed border-indigo-600 rounded-lg flex items-center justify-center font-mono font-bold text-sky-300 bg-indigo-900/30">
+                                Drop Here
+                            </div>
+                        </div>
+
+                        <!-- Inner (I) -->
+                        <div class="bg-indigo-950/50 p-3 rounded-xl border border-indigo-700/50 text-center flex flex-col justify-between">
+                            <span class="text-[10px] font-bold uppercase text-indigo-300 mb-1">Inner (-3i × 4)</span>
+                            <div id="drop-foil-i" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropMult(event, '-12i', 'drop-foil-i')" class="drop-zone min-h-[55px] border-2 border-dashed border-indigo-600 rounded-lg flex items-center justify-center font-mono font-bold text-purple-300 bg-indigo-900/30">
+                                Drop Here
+                            </div>
+                        </div>
+
+                        <!-- Last (L) -->
+                        <div class="bg-indigo-950/50 p-3 rounded-xl border border-indigo-700/50 text-center flex flex-col justify-between">
+                            <span class="text-[10px] font-bold uppercase text-indigo-300 mb-1">Last (-3i × i)</span>
+                            <div id="drop-foil-l" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropMult(event, '-3i^2', 'drop-foil-l')" class="drop-zone min-h-[55px] border-2 border-dashed border-indigo-600 rounded-lg flex items-center justify-center font-mono font-bold text-emerald-300 bg-indigo-900/30">
+                                Drop Here
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step-by-Step Simplification Revealer -->
+                    <div id="mult-success-card" class="hidden bg-indigo-950 border border-emerald-500/50 rounded-xl p-5 space-y-3 animate-fade-in">
+                        <div class="text-emerald-400 font-bold flex items-center gap-2 text-base">
+                            <i class="fa-solid fa-circle-check"></i> Expansion Complete! Now Simplify \(i^2 = -1\):
+                        </div>
+                        <div class="space-y-2 text-sm font-mono text-indigo-100">
+                            <p>Line 1: \(8 + 2i - 12i - 3\mathbf{i^2}\)</p>
+                            <p>Line 2: Replace \(i^2\) with \(-1\): \(8 - 10i - 3\mathbf{(-1)}\)</p>
+                            <p>Line 3: \(8 - 10i + 3\)</p>
+                            <p class="text-amber-300 font-bold text-base pt-1">Final Result = \(11 - 10i\)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Live Multiplication Calculator -->
+                <div class="mt-8 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-square-root-variable text-indigo-600"></i> General Multiplication Playground: \((a + bi)(c + di)\)
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="text-xs text-slate-500 font-semibold">a:</label>
+                            <input type="number" id="m-a" value="7" oninput="calcCustomMult()" class="w-full px-3 py-1.5 border rounded-lg font-bold text-slate-800">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500 font-semibold">b:</label>
+                            <input type="number" id="m-b" value="-2" oninput="calcCustomMult()" class="w-full px-3 py-1.5 border rounded-lg font-bold text-slate-800">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500 font-semibold">c:</label>
+                            <input type="number" id="m-c" value="3" oninput="calcCustomMult()" class="w-full px-3 py-1.5 border rounded-lg font-bold text-slate-800">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500 font-semibold">d:</label>
+                            <input type="number" id="m-d" value="1" oninput="calcCustomMult()" class="w-full px-3 py-1.5 border rounded-lg font-bold text-slate-800">
+                        </div>
+                    </div>
+
+                    <div id="mult-live-out" class="bg-white p-4 rounded-lg border border-slate-200 text-sm font-mono space-y-2 shadow-sm">
+                        <!-- Dynamic output from JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: DIVISION & COMPLEX CONJUGATES -->
+        <section id="tab-division" class="tab-content space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="border-b border-slate-100 pb-4 mb-6">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Section 2.5 C</span>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-2">Division of Complex Numbers & Conjugate Pairs</h2>
+                    <p class="text-slate-600 text-sm mt-1">To divide complex numbers, we eliminate \(i\) from the denominator by multiplying top and bottom by the <span class="font-bold text-indigo-600">Complex Conjugate</span>.</p>
+                </div>
+
+                <!-- Interactive Conjugate Generator Tool -->
+                <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 mb-8 space-y-4">
+                    <h3 class="text-lg font-bold text-indigo-900 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i> Interactive Complex Conjugate Finder
+                    </h3>
+                    <p class="text-xs text-indigo-800">The conjugate of \(a + bi\) is \(a - bi\). Notice that \((a + bi)(a - bi) = a^2 + b^2\) which is ALWAYS a positive real number!</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Input Denominator:</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="conj-a" value="3" oninput="updateConjugateTool()" class="w-20 px-3 py-1.5 border rounded-lg text-center font-bold">
+                                <span class="font-bold text-slate-600">+</span>
+                                <input type="number" id="conj-b" value="-4" oninput="updateConjugateTool()" class="w-20 px-3 py-1.5 border rounded-lg text-center font-bold">
+                                <span class="font-bold text-indigo-600">i</span>
+                            </div>
+                        </div>
+
+                        <div class="text-center py-2">
+                            <i class="fa-solid fa-arrow-right text-indigo-400 text-xl hidden md:inline"></i>
+                            <i class="fa-solid fa-arrow-down text-indigo-400 text-xl md:hidden"></i>
+                        </div>
+
+                        <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-center space-y-1">
+                            <div class="text-xs font-bold text-amber-800 uppercase">Complex Conjugate Pair:</div>
+                            <div id="conj-result" class="text-xl font-mono font-black text-amber-900">\(3 + 4i\)</div>
+                            <div id="conj-prod" class="text-xs text-amber-700">Product \(= 3^2 + (-4)^2 = 25\) (Real!)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drag to Rationalize Division Lab -->
+                <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700 pb-3">
+                        <div>
+                            <h3 class="text-lg font-bold text-amber-300 flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-to-circle"></i> Drag-to-Rationalize Division Walkthrough
+                            </h3>
+                            <p class="text-xs text-slate-300">Simplify \(\frac{5 - 10i}{3 - 4i}\) by dragging the correct conjugate fraction to rationalize the denominator.</p>
+                        </div>
+                    </div>
+
+                    <!-- Fraction Display -->
+                    <div class="flex items-center justify-center gap-4 py-4 text-xl sm:text-2xl font-mono">
+                        <div class="text-center">
+                            <div class="border-b-2 border-white px-3 pb-1">\(5 - 10i\)</div>
+                            <div class="pt-1 text-sky-300">\(3 - 4i\)</div>
+                        </div>
+                        <span class="text-slate-400">×</span>
+                        <!-- Drop Slot for Fraction -->
+                        <div id="drop-conj-fraction" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropDivConjugate(event)" class="drop-zone min-w-[120px] h-[80px] border-2 border-dashed border-sky-400 rounded-xl bg-slate-800/80 flex items-center justify-center text-xs text-sky-200 font-sans p-2 text-center">
+                            Drop Correct Conjugate Fraction Here
+                        </div>
+                    </div>
+
+                    <!-- Drag Bank for Conjugate Fractions -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                        <div class="text-xs font-bold uppercase text-slate-400 mb-3">Choose the correct conjugate fraction to multiply:</div>
+                        <div class="flex flex-wrap gap-4 justify-center">
+                            <div draggable="true" ondragstart="handleDragStart(event)" id="drag-frac-wrong" data-frac="wrong" class="draggable-item bg-rose-900/80 hover:bg-rose-800 border border-rose-600 px-4 py-2 rounded-lg font-mono text-sm text-center">
+                                \(\frac{3 - 4i}{3 - 4i}\)
+                            </div>
+                            <div draggable="true" ondragstart="handleDragStart(event)" id="drag-frac-correct" data-frac="correct" class="draggable-item bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-500 px-4 py-2 rounded-lg font-mono text-sm text-center">
+                                \(\frac{3 + 4i}{3 + 4i}\)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step-by-Step Expansion Container -->
+                    <div id="div-success-walkthrough" class="hidden bg-slate-950 border border-indigo-500/50 rounded-xl p-5 space-y-3 font-mono text-xs sm:text-sm text-indigo-100">
+                        <div class="text-emerald-400 font-bold font-sans text-base mb-2">
+                            <i class="fa-solid fa-check-circle"></i> Conjugate Applied! Step-by-Step Resolution:
+                        </div>
+                        <p>1. Numerator Multiplication: \((5 - 10i)(3 + 4i) = 15 + 20i - 30i - 40i^2 = 15 - 10i + 40 = 55 - 10i\)</p>
+                        <p>2. Denominator Multiplication: \((3 - 4i)(3 + 4i) = 3^2 - (4i)^2 = 9 - (-16) = 25\)</p>
+                        <p>3. Combine Fraction: \(\frac{55 - 10i}{25}\)</p>
+                        <p>4. Separate Real and Imaginary: \(\frac{55}{25} - \frac{10}{25}i = \mathbf{\frac{11}{5} - \frac{2}{5}i}\)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: PRACTICE EXERCISES -->
+        <section id="tab-practice" class="tab-content space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="border-b border-slate-100 pb-4 mb-6 flex justify-between items-center">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Section 2.5 Quick Test</span>
+                        <h2 class="text-2xl font-bold text-slate-800 mt-2">Interactive Practice Exercises</h2>
+                        <p class="text-slate-600 text-sm mt-1">Solve textbook-style practice problems and test your understanding with instant feedback.</p>
+                    </div>
+                    <div class="bg-indigo-50 border border-indigo-200 px-4 py-2 rounded-xl text-center">
+                        <div class="text-xs font-bold text-indigo-600 uppercase">Score Tracker</div>
+                        <div id="quiz-score" class="text-2xl font-black text-indigo-900">0 / 4</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- Question 1 -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
+                        <div class="text-xs font-bold text-indigo-600 uppercase">Problem 1 (Addition)</div>
+                        <div class="text-base font-bold text-slate-800">Simplify \((1 + 3i) + (4 - 6i)\)</div>
+                        <div class="space-y-2">
+                            <label class="block text-xs text-slate-500">Your Answer (Form \(a + bi\)):</label>
+                            <input type="text" id="q1-input" placeholder="e.g. 5-3i" class="w-full px-3 py-2 border rounded-lg font-mono text-sm">
+                            <button onclick="checkQuizQ1()" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-xs hover:bg-indigo-700 transition">Submit Answer</button>
+                        </div>
+                        <div id="q1-feedback" class="text-xs font-semibold"></div>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
+                        <div class="text-xs font-bold text-indigo-600 uppercase">Problem 2 (Subtraction)</div>
+                        <div class="text-base font-bold text-slate-800">Simplify \((-2 - 5i) - (9 - 2i)\)</div>
+                        <div class="space-y-2">
+                            <label class="block text-xs text-slate-500">Your Answer (Form \(a + bi\)):</label>
+                            <input type="text" id="q2-input" placeholder="e.g. -11-3i" class="w-full px-3 py-2 border rounded-lg font-mono text-sm">
+                            <button onclick="checkQuizQ2()" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-xs hover:bg-indigo-700 transition">Submit Answer</button>
+                        </div>
+                        <div id="q2-feedback" class="text-xs font-semibold"></div>
+                    </div>
+
+                    <!-- Question 3 -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
+                        <div class="text-xs font-bold text-indigo-600 uppercase">Problem 3 (Multiplication)</div>
+                        <div class="text-base font-bold text-slate-800">Simplify \((7 - 2i)(3 + i)\)</div>
+                        <div class="space-y-2">
+                            <label class="block text-xs text-slate-500">Your Answer (Form \(a + bi\)):</label>
+                            <input type="text" id="q3-input" placeholder="e.g. 23+i" class="w-full px-3 py-2 border rounded-lg font-mono text-sm">
+                            <button onclick="checkQuizQ3()" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-xs hover:bg-indigo-700 transition">Submit Answer</button>
+                        </div>
+                        <div id="q3-feedback" class="text-xs font-semibold"></div>
+                    </div>
+
+                    <!-- Question 4 -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3">
+                        <div class="text-xs font-bold text-indigo-600 uppercase">Problem 4 (Division)</div>
+                        <div class="text-base font-bold text-slate-800">Simplify \(\frac{3}{2 + i}\) into \(a + bi\)</div>
+                        <div class="space-y-2">
+                            <label class="block text-xs text-slate-500">Your Answer (Form \(a + bi\) or fractions like 6/5-3/5i):</label>
+                            <input type="text" id="q4-input" placeholder="e.g. 6/5-3/5i" class="w-full px-3 py-2 border rounded-lg font-mono text-sm">
+                            <button onclick="checkQuizQ4()" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-xs hover:bg-indigo-700 transition">Submit Answer</button>
+                        </div>
+                        <div id="q4-feedback" class="text-xs font-semibold"></div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: CHALLENGING QUESTIONS & WALKTHROUGHS -->
+        <section id="tab-challenges" class="tab-content space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="border-b border-slate-100 pb-4 mb-6">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-3 py-1 rounded-full">Senior Level Challenges</span>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-2">Challenging Exam-Style Problems & Guided Walkthroughs</h2>
+                    <p class="text-slate-600 text-sm mt-1">Based directly on textbook Examples 2.20, 2.21, and 2.22. Master algebraic parameter solving with complex numbers!</p>
+                </div>
+
+                <div class="space-y-6">
+
+                    <!-- Challenge 1: Example 2.20 -->
+                    <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-xl p-6 shadow-md space-y-4">
+                        <div class="flex items-center justify-between border-b border-indigo-800/80 pb-3">
+                            <span class="text-xs font-bold text-amber-400 uppercase tracking-widest">Challenge 1 (Textbook Ex 2.20)</span>
+                            <span class="text-xs bg-indigo-900 text-indigo-200 px-2.5 py-1 rounded">Level 2 Algebraic Parameter</span>
+                        </div>
+                        <div class="text-lg font-bold text-white">
+                            Let \(k\) be a real number. Simplify <span class="text-amber-300 font-mono">\(8 - \frac{k + 8i}{i}\)</span> and express the result in the form \(a + bi\).
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3">
+                            <button onclick="toggleWalkthrough('ch1-walkthrough')" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold px-4 py-2 rounded-lg text-xs transition">
+                                <i class="fa-solid fa-graduation-cap"></i> Toggle Guided Solution Walkthrough
+                            </button>
+                        </div>
+
+                        <!-- Walkthrough Drawer -->
+                        <div id="ch1-walkthrough" class="hidden bg-slate-950/80 p-5 rounded-xl border border-indigo-700/50 space-y-3 font-mono text-xs sm:text-sm text-indigo-100">
+                            <p class="text-amber-300 font-bold font-sans">Detailed Step-by-Step Walkthrough:</p>
+                            <p><strong>Step 1:</strong> Multiply numerator and denominator of the fraction by \(i\) to rationalize:</p>
+                            <p class="pl-4 text-sky-200">\(8 - \frac{k + 8i}{i} \times \frac{i}{i} = 8 - \frac{ki + 8i^2}{i^2}\)</p>
+                            <p><strong>Step 2:</strong> Substitute \(i^2 = -1\):</p>
+                            <p class="pl-4 text-sky-200">\(= 8 - \frac{ki + 8(-1)}{-1} = 8 - \frac{ki - 8}{-1}\)</p>
+                            <p><strong>Step 3:</strong> Divide by \(-1\):</p>
+                            <p class="pl-4 text-sky-200">\(= 8 - (-(ki - 8)) = 8 + (ki - 8)\)</p>
+                            <p><strong>Step 4:</strong> Simplify constants:</p>
+                            <p class="pl-4 text-emerald-400 font-bold text-base">\(= ki\)</p>
+                        </div>
+                    </div>
+
+                    <!-- Challenge 2: Example 2.21 -->
+                    <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-xl p-6 shadow-md space-y-4">
+                        <div class="flex items-center justify-between border-b border-indigo-800/80 pb-3">
+                            <span class="text-xs font-bold text-amber-400 uppercase tracking-widest">Challenge 2 (Textbook Ex 2.21)</span>
+                            <span class="text-xs bg-indigo-900 text-indigo-200 px-2.5 py-1 rounded">Power Cycling + Division</span>
+                        </div>
+                        <div class="text-lg font-bold text-white">
+                            Find the real part of <span class="text-amber-300 font-mono">\(\frac{i^{10} + 2i^9}{1 - i}\)</span>.
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3">
+                            <button onclick="toggleWalkthrough('ch2-walkthrough')" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold px-4 py-2 rounded-lg text-xs transition">
+                                <i class="fa-solid fa-graduation-cap"></i> Toggle Guided Solution Walkthrough
+                            </button>
+                        </div>
+
+                        <!-- Walkthrough Drawer -->
+                        <div id="ch2-walkthrough" class="hidden bg-slate-950/80 p-5 rounded-xl border border-indigo-700/50 space-y-3 font-mono text-xs sm:text-sm text-indigo-100">
+                            <p class="text-amber-300 font-bold font-sans">Detailed Step-by-Step Walkthrough:</p>
+                            <p><strong>Step 1:</strong> Simplify powers of \(i\) using remainders when divided by 4:</p>
+                            <p class="pl-4 text-sky-200">\(10 \div 4 = 2 \text{ R } 2 \implies i^{10} = i^2 = -1\)</p>
+                            <p class="pl-4 text-sky-200">\(9 \div 4 = 2 \text{ R } 1 \implies i^9 = i^1 = i\)</p>
+                            <p class="pl-4 text-indigo-200">The fraction becomes \(\frac{-1 + 2i}{1 - i}\)</p>
+                            <p><strong>Step 2:</strong> Rationalize by multiplying by conjugate \((1 + i)\):</p>
+                            <p class="pl-4 text-sky-200">\(\frac{(-1 + 2i)(1 + i)}{(1 - i)(1 + i)} = \frac{-1 - i + 2i + 2i^2}{1^2 - i^2} = \frac{-1 + i - 2}{1 - (-1)} = \frac{-3 + i}{2}\)</p>
+                            <p><strong>Step 3:</strong> Separate into \(a + bi\):</p>
+                            <p class="pl-4 text-sky-200">\(= -\frac{3}{2} + \frac{1}{2}i\)</p>
+                            <p><strong>Step 4:</strong> Extract Real Part:</p>
+                            <p class="pl-4 text-emerald-400 font-bold text-base">\(\text{Real Part} = -\frac{3}{2}\)</p>
+                        </div>
+                    </div>
+
+                    <!-- Challenge 3: Example 2.22 -->
+                    <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-xl p-6 shadow-md space-y-4">
+                        <div class="flex items-center justify-between border-b border-indigo-800/80 pb-3">
+                            <span class="text-xs font-bold text-amber-400 uppercase tracking-widest">Challenge 3 (Textbook Ex 2.22)</span>
+                            <span class="text-xs bg-indigo-900 text-indigo-200 px-2.5 py-1 rounded">Purely Real Condition</span>
+                        </div>
+                        <div class="text-lg font-bold text-white">
+                            If \(k\) and <span class="text-amber-300 font-mono">\(\frac{10}{3 + i} - ki\)</span> are real numbers, find the value of \(k\).
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3">
+                            <button onclick="toggleWalkthrough('ch3-walkthrough')" class="bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold px-4 py-2 rounded-lg text-xs transition">
+                                <i class="fa-solid fa-graduation-cap"></i> Toggle Guided Solution Walkthrough
+                            </button>
+                        </div>
+
+                        <!-- Walkthrough Drawer -->
+                        <div id="ch3-walkthrough" class="hidden bg-slate-950/80 p-5 rounded-xl border border-indigo-700/50 space-y-3 font-mono text-xs sm:text-sm text-indigo-100">
+                            <p class="text-amber-300 font-bold font-sans">Detailed Step-by-Step Walkthrough:</p>
+                            <p><strong>Step 1:</strong> Simplify \(\frac{10}{3 + i}\) by multiplying top and bottom by conjugate \((3 - i)\):</p>
+                            <p class="pl-4 text-sky-200">\(\frac{10(3 - i)}{(3 + i)(3 - i)} = \frac{30 - 10i}{3^2 - i^2} = \frac{30 - 10i}{9 - (-1)} = \frac{30 - 10i}{10} = 3 - i\)</p>
+                            <p><strong>Step 2:</strong> Substitute back into original expression:</p>
+                            <p class="pl-4 text-sky-200">\(3 - i - ki = 3 - (1 + k)i\)</p>
+                            <p><strong>Step 3:</strong> Since the expression is a REAL number, its imaginary part MUST be 0:</p>
+                            <p class="pl-4 text-sky-200">\(-(1 + k) = 0 \implies 1 + k = 0\)</p>
+                            <p class="pl-4 text-emerald-400 font-bold text-base">\(k = -1\)</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p>Complex Numbers Interactive Learning Platform • Based on Textbook Chapter 2.5 Operations</p>
+            <p class="text-slate-500">Designed for interactive mathematical exploration and self-guided learning.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        function switchTab(tabId) {
+            // Hide all tab contents
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Deactivate all buttons
+            const navBtns = document.querySelectorAll('.nav-tab');
+            navBtns.forEach(btn => {
+                btn.classList.remove('bg-indigo-700', 'font-semibold', 'text-white');
+                btn.classList.add('text-indigo-100');
+            });
+
+            // Activate selected tab content
+            const targetTab = document.getElementById(tabId);
+            if(targetTab) targetTab.classList.add('active');
+
+            // Highlight selected button
+            const targetBtn = document.getElementById('btn-' + tabId);
+            if(targetBtn) {
+                targetBtn.classList.add('bg-indigo-700', 'font-semibold', 'text-white');
+            }
+
+            // Re-render MathJax formulas if available
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function calculateCustomPower() {
+            const inputVal = parseInt(document.getElementById('power-input').value);
+            if (isNaN(inputVal) || inputVal < 1) {
+                alert('Please enter a valid positive integer.');
+                return;
+            }
+
+            const remainder = inputVal % 4;
+            const quotient = Math.floor(inputVal / 4);
+
+            let resText = "";
+            let resShort = "";
+
+            if (remainder === 1) {
+                resText = `i^1 = i`;
+                resShort = `i`;
+            } else if (remainder === 2) {
+                resText = `i^2 = -1`;
+                resShort = `-1`;
+            } else if (remainder === 3) {
+                resText = `i^3 = -i`;
+                resShort = `-i`;
+            } else {
+                resText = `i^4 = 1`;
+                resShort = `1`;
+            }
+
+            document.getElementById('step-div').innerText = `${inputVal} ÷ 4 = ${quotient} R ${remainder}`;
+            document.getElementById('step-remainder').innerText = `Remainder = ${remainder}`;
+            document.getElementById('step-algebraic').innerHTML = `\\(i^{${inputVal}} = (i^4)^{${quotient}} \\cdot i^{${remainder === 0 ? 4 : remainder}}\\)` ;
+            document.getElementById('step-final').innerHTML = `\\(${resText}\\)`;
+            document.getElementById('wheel-result-val').innerHTML = `\\(${resShort}\\)`;
+
+            highlightPowerCard(remainder === 0 ? 4 : remainder);
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function calcExponent(p) {
+            document.getElementById('power-input').value = p;
+            calculateCustomPower();
+        }
+
+        function selectPower(rem) {
+            highlightPowerCard(rem === 0 ? 4 : rem);
+        }
+
+        function highlightPowerCard(cardNum) {
+            for (let i = 1; i <= 4; i++) {
+                const card = document.getElementById('card-p' + i);
+                if (card) card.classList.remove('active-power');
+            }
+            const activeCard = document.getElementById('card-p' + (cardNum === 0 ? 4 : cardNum));
+            if (activeCard) activeCard.classList.add('active-power');
+        }
+
+        function checkBlank(id, expected) {
+            const val = document.getElementById('blank-' + id).value.trim().toLowerCase();
+            const feedback = document.getElementById('feedback-' + id);
+            if (val === expected) {
+                feedback.innerHTML = `<span class="text-emerald-600"><i class="fa-solid fa-check"></i> Correct!</span>`;
+            } else {
+                feedback.innerHTML = `<span class="text-rose-600"><i class="fa-solid fa-xmark"></i> Try again</span>`;
+            }
+        }
+
+        let currentOpMode = 'add';
+
+        function setOpMode(mode) {
+            currentOpMode = mode;
+            const addBtn = document.getElementById('op-add-btn');
+            const subBtn = document.getElementById('op-sub-btn');
+
+            if (mode === 'add') {
+                addBtn.className = "px-6 py-2 rounded-lg font-bold text-sm bg-indigo-600 text-white shadow-md transition";
+                subBtn.className = "px-6 py-2 rounded-lg font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300 transition";
+            } else {
+                subBtn.className = "px-6 py-2 rounded-lg font-bold text-sm bg-indigo-600 text-white shadow-md transition";
+                addBtn.className = "px-6 py-2 rounded-lg font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300 transition";
+            }
+
+            updateAddSubCalc();
+        }
+
+        function updateAddSubCalc() {
+            const a = parseInt(document.getElementById('input-a').value);
+            const b = parseInt(document.getElementById('input-b').value);
+            const c = parseInt(document.getElementById('input-c').value);
+            const d = parseInt(document.getElementById('input-d').value);
+
+            document.getElementById('val-a').innerText = a;
+            document.getElementById('val-b').innerText = b;
+            document.getElementById('val-c').innerText = c;
+            document.getElementById('val-d').innerText = d;
+
+            const formatComp = (x, y) => `${x} ${y >= 0 ? '+' : '-'} ${Math.abs(y)}i`;
+
+            document.getElementById('z1-badge').innerText = formatComp(a, b);
+            document.getElementById('z2-badge').innerText = formatComp(c, d);
+
+            if (currentOpMode === 'add') {
+                document.getElementById('calc-step1').innerHTML = `\\((${formatComp(a, b)}) + (${formatComp(c, d)}) = ${a} ${b>=0?'+':'-'} ${Math.abs(b)}i ${c>=0?'+':'-'} ${Math.abs(c)} ${d>=0?'+':'-'} ${Math.abs(d)}i\\)`;
+                
+                const realSum = a + c;
+                const imagSum = b + d;
+                
+                document.getElementById('calc-step2').innerHTML = `\\(= (${a} ${c>=0?'+':'-'} ${Math.abs(c)}) + (${b} ${d>=0?'+':'-'} ${Math.abs(d)})i\\)`;
+                document.getElementById('calc-step3').innerHTML = `\\(= ${formatComp(realSum, imagSum)}\\)`;
+            } else {
+                document.getElementById('calc-step1').innerHTML = `\\((${formatComp(a, b)}) - (${formatComp(c, d)}) = ${a} ${b>=0?'+':'-'} ${Math.abs(b)}i ${-c>=0?'+':'-'} ${Math.abs(-c)} ${-d>=0?'+':'-'} ${Math.abs(-d)}i\\)`;
+                
+                const realDiff = a - c;
+                const imagDiff = b - d;
+                
+                document.getElementById('calc-step2').innerHTML = `\\(= (${a} - (${c})) + (${b} - (${d}))i\\)`;
+                document.getElementById('calc-step3').innerHTML = `\\(= ${formatComp(realDiff, imagDiff)}\\)`;
+            }
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        let foilDropState = {
+            'drop-foil-f': false,
+            'drop-foil-o': false,
+            'drop-foil-i': false,
+            'drop-foil-l': false
+        };
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.id);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDropMult(e, expectedTerm, dropZoneId) {
+            e.preventDefault();
+            const dropZone = document.getElementById(dropZoneId);
+            dropZone.classList.remove('drag-over');
+
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const draggedEl = document.getElementById(draggedId);
+
+            if (!draggedEl) return;
+
+            const termVal = draggedEl.getAttribute('data-term');
+
+            if (termVal === expectedTerm) {
+                dropZone.innerHTML = `<span class="text-base font-black">${termVal}</span>`;
+                dropZone.classList.add('bg-emerald-950/80', 'border-emerald-400');
+                draggedEl.style.display = 'none';
+                foilDropState[dropZoneId] = true;
+
+                // Check if all 4 terms dropped
+                if (Object.values(foilDropState).every(v => v === true)) {
+                    document.getElementById('mult-success-card').classList.remove('hidden');
+                }
+            } else {
+                dropZone.classList.add('border-rose-500');
+                setTimeout(() => dropZone.classList.remove('border-rose-500'), 1000);
+            }
+        }
+
+        function resetMultDragLab() {
+            foilDropState = {
+                'drop-foil-f': false,
+                'drop-foil-o': false,
+                'drop-foil-i': false,
+                'drop-foil-l': false
+            };
+
+            const dragItems = ['drag-t1', 'drag-t2', 'drag-t3', 'drag-t4'];
+            dragItems.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'inline-block';
+            });
+
+            const dropZones = ['drop-foil-f', 'drop-foil-o', 'drop-foil-i', 'drop-foil-l'];
+            dropZones.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = 'Drop Here';
+                    el.className = "drop-zone min-h-[55px] border-2 border-dashed border-indigo-600 rounded-lg flex items-center justify-center font-mono font-bold bg-indigo-900/30";
+                }
+            });
+
+            document.getElementById('mult-success-card').classList.add('hidden');
+        }
+
+        function calcCustomMult() {
+            const a = parseFloat(document.getElementById('m-a').value) || 0;
+            const b = parseFloat(document.getElementById('m-b').value) || 0;
+            const c = parseFloat(document.getElementById('m-c').value) || 0;
+            const d = parseFloat(document.getElementById('m-d').value) || 0;
+
+            const ac = a * c;
+            const ad = a * d;
+            const bc = b * c;
+            const bd = b * d;
+
+            const realPart = ac - bd;
+            const imagPart = ad + bc;
+
+            const formatComp = (x, y) => `${x} ${y >= 0 ? '+' : '-'} ${Math.abs(y)}i`;
+
+            const out = document.getElementById('mult-live-out');
+            out.innerHTML = `
+                <div><strong>FOIL Expansion:</strong> (${a})(${c}) + (${a})(${d}i) + (${b}i)(${c}) + (${b}i)(${d}i)</div>
+                <div><strong>Unsimplified:</strong> ${ac} + ${ad}i + ${bc}i + ${bd}i²</div>
+                <div><strong>Substitute i² = -1:</strong> ${ac} + (${ad + bc})i - (${bd})</div>
+                <div class="text-indigo-700 font-bold text-base border-t pt-1">Final Result: ${formatComp(realPart, imagPart)}</div>
+            `;
+        }
+
+        function updateConjugateTool() {
+            const a = parseFloat(document.getElementById('conj-a').value) || 0;
+            const b = parseFloat(document.getElementById('conj-b').value) || 0;
+
+            const conjB = -b;
+            const product = a*a + b*b;
+
+            const formatComp = (x, y) => `${x} ${y >= 0 ? '+' : '-'} ${Math.abs(y)}i`;
+
+            document.getElementById('conj-result').innerHTML = `\\(${formatComp(a, conjB)}\\)`;
+            document.getElementById('conj-prod').innerText = `Product = ${a}² + (${b})² = ${product} (Real!)`;
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function handleDropDivConjugate(e) {
+            e.preventDefault();
+            const dropZone = document.getElementById('drop-conj-fraction');
+            dropZone.classList.remove('drag-over');
+
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const draggedEl = document.getElementById(draggedId);
+
+            if (!draggedEl) return;
+
+            const fracType = draggedEl.getAttribute('data-frac');
+
+            if (fracType === 'correct') {
+                dropZone.innerHTML = `\\(\\frac{3 + 4i}{3 + 4i}\\)`;
+                dropZone.classList.add('bg-emerald-900', 'border-emerald-400');
+                document.getElementById('div-success-walkthrough').classList.remove('hidden');
+
+                if (window.MathJax) {
+                    MathJax.typesetPromise();
+                }
+            } else {
+                dropZone.classList.add('border-rose-500');
+                setTimeout(() => dropZone.classList.remove('border-rose-500'), 1000);
+            }
+        }
+
+        let score = 0;
+        let answered = { q1: false, q2: false, q3: false, q4: false };
+
+        function updateScore() {
+            document.getElementById('quiz-score').innerText = `${score} / 4`;
+        }
+
+        function checkQuizQ1() {
+            const ans = document.getElementById('q1-input').value.replace(/\s+/g, '').toLowerCase();
+            const feedback = document.getElementById('q1-feedback');
+            if (ans === '5-3i') {
+                feedback.innerHTML = `<span class="text-emerald-600"><i class="fa-solid fa-check"></i> Correct! (1+4) + (3-6)i = 5 - 3i</span>`;
+                if (!answered.q1) { score++; answered.q1 = true; updateScore(); }
+            } else {
+                feedback.innerHTML = `<span class="text-rose-600"><i class="fa-solid fa-xmark"></i> Incorrect. Combine real and imaginary parts.</span>`;
+            }
+        }
+
+        function checkQuizQ2() {
+            const ans = document.getElementById('q2-input').value.replace(/\s+/g, '').toLowerCase();
+            const feedback = document.getElementById('q2-feedback');
+            if (ans === '-11-3i') {
+                feedback.innerHTML = `<span class="text-emerald-600"><i class="fa-solid fa-check"></i> Correct! (-2-9) + (-5 - (-2))i = -11 - 3i</span>`;
+                if (!answered.q2) { score++; answered.q2 = true; updateScore(); }
+            } else {
+                feedback.innerHTML = `<span class="text-rose-600"><i class="fa-solid fa-xmark"></i> Incorrect. Watch the negative distribution!</span>`;
+            }
+        }
+
+        function checkQuizQ3() {
+            const ans = document.getElementById('q3-input').value.replace(/\s+/g, '').toLowerCase();
+            const feedback = document.getElementById('q3-feedback');
+            if (ans === '23+i' || ans === '23+1i') {
+                feedback.innerHTML = `<span class="text-emerald-600"><i class="fa-solid fa-check"></i> Correct! 21 + 7i - 6i - 2i² = 21 + i + 2 = 23 + i</span>`;
+                if (!answered.q3) { score++; answered.q3 = true; updateScore(); }
+            } else {
+                feedback.innerHTML = `<span class="text-rose-600"><i class="fa-solid fa-xmark"></i> Incorrect. FOIL: 21 + 7i - 6i - 2i²</span>`;
+            }
+        }
+
+        function checkQuizQ4() {
+            const ans = document.getElementById('q4-input').value.replace(/\s+/g, '').toLowerCase();
+            const feedback = document.getElementById('q4-feedback');
+            if (ans === '6/5-3/5i' || ans === '1.2-0.6i') {
+                feedback.innerHTML = `<span class="text-emerald-600"><i class="fa-solid fa-check"></i> Correct! Multiply by (2-i)/(2-i) to get (6-3i)/5</span>`;
+                if (!answered.q4) { score++; answered.q4 = true; updateScore(); }
+            } else {
+                feedback.innerHTML = `<span class="text-rose-600"><i class="fa-solid fa-xmark"></i> Incorrect. Multiply by conjugate pair 2 - i</span>`;
+            }
+        }
+
+        function toggleWalkthrough(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('hidden');
+                if (window.MathJax) {
+                    MathJax.typesetPromise();
+                }
+            }
+        }
+
+        // Initialize default state on load
+        window.onload = function() {
+            updateAddSubCalc();
+            calcCustomMult();
+            updateConjugateTool();
+            calculateCustomPower();
+        };
+    </script>
+</body>
+</html>
